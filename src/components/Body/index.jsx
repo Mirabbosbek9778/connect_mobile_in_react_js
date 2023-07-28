@@ -1,20 +1,23 @@
 import { useEffect, useState } from "react";
-import Navbar from "../Navbar";
+import Close from "./funct";
+// import Navbar from "../Navbar";
 
 export default function Main() {
   const [data, setData] = useState("");
-  const [geros, setGeros] = useState("");
-  const [locat, setLocat] = useState({
-    lat: 41,
-    lng: 64,
-  });
-  const [show, setShow] = useState({
-    lng: false,
-    grc: false,
-    time: false,
-    lct: false,
-  });
-
+  const [geros, setGeros] = useState();
+  const [sslika, setSsilka] = useState();
+  const [lan, setlan] = useState();
+  const [lct, setlct] = useState({ lng: "", ltd: "" });
+  // const [locat, setLocat] = useState({
+  //   lat: 41,
+  //   lng: 64,
+  // });
+  // const [show, setShow] = useState({
+  //   lng: false,
+  //   grc: false,
+  //   time: false,
+  //   lct: false,
+  // });
   const getLocationIos = () => {
     window?.webkit?.messageHandlers?.buttonPressed.postMessage("getLocation");
   };
@@ -25,17 +28,22 @@ export default function Main() {
     };
   }, []);
 
-  if (event?.data?.latitude || event?.data?.longitude) {
-    setLocat({ ltd: event?.data?.latitude, lng: event?.data?.longitude });
-    setShow({ ...show, lct: true });
-  }
-
   const handleReceivedData = (event) => {
     const receivedData = event.data;
-    console.log(receivedData);
-    if (event?.data?.currentDateString)
+    // console.log(receivedData);
+    if (event?.data?.code) {
+      // console.log(receivedData?.code);
+      setSsilka(receivedData?.code);
+    }
+    if (event?.data?.currentDateString) {
       setData(receivedData?.currentDateString);
-    setShow({ ...show, time: true });
+    }
+    if (receivedData?.latitude || receivedData?.longitude) {
+      setlct({ ltd: receivedData.latitude, lng: receivedData.longitude });
+    }
+    if (receivedData?.languageCode) {
+      setlan(receivedData?.languageCode);
+    }
   };
   useEffect(() => {
     const sendOrientationData = () => {
@@ -44,7 +52,6 @@ export default function Main() {
         if (window.orientation === 90) {
           orientation = "landscapeleft";
           setGeros(orientation);
-          setShow({ ...show, grc: true });
         } else {
           orientation = "landscapeRight";
           setGeros(orientation);
@@ -53,6 +60,9 @@ export default function Main() {
         orientation = "portrait";
         setGeros(orientation);
       }
+      // if (event?.data?.latitude || event?.data?.longitude) {
+      //   setlct({ ltd: event?.data?.latitude, lng: event?.data?.longitude });
+      // }
     };
     window.addEventListener("orientationchange", sendOrientationData);
     return () => {
@@ -63,8 +73,16 @@ export default function Main() {
   const handleClick = () => {
     window?.webkit?.messageHandlers?.buttonPressed?.postMessage("getTime");
   };
+
   const handleClick2 = () => {
-    window?.webkit?.messageHandlers?.buttonPressed.postMessage("close");
+    window?.webkit?.messageHandlers?.buttonPressed.postMessage("QrCode");
+  };
+
+  const getDeep = () => {
+    window?.webkit?.messageHandlers?.buttonPressed.postMessage("deeplink1");
+  };
+  const getLanguage = () => {
+    window?.webkit?.messageHandlers?.buttonPressed.postMessage("getLanguage");
   };
   const sendDataToAndroid = () => {
     window?.JSBridge?.showMessageInNative("getTime");
@@ -72,19 +90,13 @@ export default function Main() {
   const sendDataToAndroidClose = () => {
     window?.JSBridge?.showMessageInNative("close");
   };
+
   return (
     <>
-      <div>
-        <Navbar locat={locat} />
-      </div>
-      <div className="h-56 sm:h-64 xl:h-80 2xl:h-96 p-5"></div>
       <div className="flex min-h-full  flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-        <h1 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
-          {/* {`Received message from mobile app: ${data}`} */}
-        </h1>
-        <h1 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900"></h1>
-        <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+        <div className="sm:mx-auto sm:w-full sm:max-w-sm">
           <div>
+            <Close />
             <button
               onClick={() => {
                 handleClick();
@@ -95,18 +107,29 @@ export default function Main() {
             >
               get Time
             </button>
-            {show.time && <p>{data}</p>}
             <div>
               <button
                 className="mt-2 flex w-full justify-center rounded-md bg-orange-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-lime-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                 onClick={getLocationIos}
               >
                 getlocation
-                {show.lct && <p>{locat}</p>}
+                {/* <p>{locat}</p> */}
               </button>
             </div>
           </div>
           <div>
+            <button
+              onClick={getDeep}
+              className="mt-2 flex w-full justify-center rounded-md bg-orange-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-lime-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            >
+              DeepLink
+            </button>
+            <button
+              onClick={getLanguage}
+              className="mt-2 flex w-full justify-center rounded-md bg-orange-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-lime-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            >
+              Language
+            </button>
             <button
               onClick={() => {
                 handleClick2();
@@ -115,13 +138,24 @@ export default function Main() {
               id="webButton2"
               className="mt-2 flex w-full justify-center rounded-md bg-orange-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-lime-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             >
-              Close
+              qr code
             </button>
+            <a href={sslika}>
+              <button
+                className="mt-2 flex w-full justify-center rounded-md bg-orange-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-lime-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                style={{ marginTop: "5px" }}
+              >
+                {sslika}
+              </button>
+            </a>
           </div>
-          <p className="mt-10 text-center text-sm text-gray-500">
-            Not a member?{" "}
-          </p>
-          {show.grc && <p>{geros}</p>}
+          <p className="mt-10 text-center text-sm text-gray-500">{geros}</p>
+          <p>{sslika}</p>
+          <p>{data}</p>
+          {/* <p>{lct}</p> */}
+          <p>{lct.lng}</p>
+          <p>{lct.ltd}</p>
+          <p>{lan}</p>
         </div>
       </div>
     </>

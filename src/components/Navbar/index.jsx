@@ -4,16 +4,8 @@ import { Map, Marker, GoogleApiWrapper } from "google-maps-react";
 const Navbar = (props) => {
   const [markerPosition, setMarkerPosition] = useState({
     lat: 40.854885,
-    lng: -88.081807,
+    lng: 66.081807,
   });
-
-  const style = {
-    zindex: "-10",
-    marginLeft: "550px",
-    marginTop: "10px",
-    width: "40%",
-    height: "500px",
-  };
 
   const onMapClicked = (mapProps, map, clickEvent) => {
     const newMarkerPosition = {
@@ -23,33 +15,39 @@ const Navbar = (props) => {
     setMarkerPosition(newMarkerPosition);
   };
 
-  const onMarkerDragEnd = (coord) => {
+  const onMarkerDragEnd = (coord, map, event) => {
     const newMarkerPosition = {
-      lat: coord.latLng.lat(),
-      lng: coord.latLng.lng(),
+      lat: event.latLng.lat(),
+      lng: event.latLng.lng(),
     };
     setMarkerPosition(newMarkerPosition);
   };
 
   return (
-    <div className="relative ">
-      <Map
-        google={props.google}
-        style={style}
-        initialCenter={{
-          lat: props.locat.lat,
-          lng: props.locat.lng,
-        }}
-        zoom={5}
-        onClick={onMapClicked}
-      >
-        <Marker
-          name={"hello"}
-          position={markerPosition}
-          draggable={true}
-          onDragend={onMarkerDragEnd}
-        />
-      </Map>
+    <div className="flex justify-center items-center">
+      <div className="w-40 " style={{ marginRight: "500px" }}>
+        <Map
+          style={{
+            width: "30%",
+            height: "50%",
+          }}
+          google={props.google}
+          initialCenter={{
+            lat: 40.854885,
+            lng: 66.081807,
+          }}
+          zoom={5}
+          onClick={onMapClicked}
+        >
+          <Marker
+            style={{}}
+            name={"hello"}
+            position={markerPosition}
+            draggable={true}
+            onDragend={onMarkerDragEnd}
+          />
+        </Map>
+      </div>
     </div>
   );
 };
